@@ -21,7 +21,15 @@ class Vocab(BaseVocab):
         return self.table.keys().__repr__()
 
     def __str__(self):
-        return self.table.keys().__str__()            
+        return self.table.keys().__str__()
+
+    def __getitem__(self, word):
+        if word in self.table:
+            return self.table[word]
+        return self.table['unk']      
+
+    def __contains__(self, word):
+        return word in self.table      
 
 class Context(BaseVocab):
 
@@ -31,7 +39,6 @@ class Context(BaseVocab):
         self.table['unk'] = 0
         self.current_size += 1
 
-
     def add(self, word):
         if word not in self.table and not self.is_full():
             self.table[word] = self.current_size
@@ -39,6 +46,18 @@ class Context(BaseVocab):
     
     def __getitem__(self, word):
         return self.table[word]
+    
+    def __repr__(self):
+        return self.table.keys().__repr__()
+
+    def __str__(self):
+        return self.table.keys().__str__()
+
+    def __len__(self):
+        return len(self.table.keys())
+
+    def __contains__(self, word):
+        return word in self.table 
     
 class WordRep:
 
@@ -58,14 +77,14 @@ class WordRep:
 
     def add_context(self, context):
         if context in self.contexts or self.is_full():
-            print(context in self.contexts)
+            #print(context in self.contexts)
             if context in self.contexts.keys():
-                print(context, self.contexts[context])
+                #print(context, self.contexts[context])
                 self.contexts[context] += 1
-                print(context, self.contexts[context])
+                #print(context, self.contexts[context])
             else:
                 self.contexts['unk'] += 1
-        # I'm sure if this necesary this condition maybe for hashing
+        # I'm not sure if this is necesary this condition maybe for hashing
         elif self.size == self.max_size:
             self.contexts['unk'] += 1
         else:
