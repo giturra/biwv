@@ -16,7 +16,12 @@ class Vocab(BaseVocab):
             self.current_size += 1
         elif word in self.table.keys():
             self.table[word.word].counter += 1
-            
+
+    def __repr__(self):
+        return self.table.keys().__repr__()
+
+    def __str__(self):
+        return self.table.keys().__str__()            
 
 class Context(BaseVocab):
 
