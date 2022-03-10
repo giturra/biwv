@@ -7,8 +7,16 @@ class Vocab(BaseVocab):
 
     def __init__(self, max_size):
         super().__init__(max_size)
-        self.counts = Counter()
+        self.table = defaultdict(int)
 
+    def add(self, word):
+        if word not in self.table.keys() and not self.is_full():
+            self.table[word.word] = word
+            self.table[word.word].counter += 1
+            self.current_size += 1
+        elif word in self.table.keys():
+            self.table[word.word].counter += 1
+            
 
 class Context(BaseVocab):
 
@@ -34,7 +42,7 @@ class WordRep:
         self.max_size = c_size
         self.size = 0
         self.contexts = defaultdict(int)
-        self.count = 0
+        self.counter = 0
 
         # checking
         self.contexts['unk'] = 0
