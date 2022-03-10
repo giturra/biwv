@@ -24,17 +24,20 @@ class WordRep:
         self.size += 1
 
     def is_full(self):
-        return self.size == self.max_size
+        return self.size == self.max_size   
 
     def add_context(self, context):
         if context in self.contexts or self.is_full():
-            if context in self.contexts:
+            print(context in self.contexts)
+            if context in self.contexts.keys():
+                print(context, self.contexts[context])
                 self.contexts[context] += 1
+                print(context, self.contexts[context])
             else:
                 self.contexts['unk'] += 1
-        elif self.size + 1 == self.max_size:
+        # I'm sure if this necesary this condition maybe for hashing
+        elif self.size == self.max_size:
             self.contexts['unk'] += 1
-            self.size += 1
         else:
             self.contexts[context] += 1
             self.size += 1
