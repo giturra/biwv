@@ -23,5 +23,17 @@ This is an unfinished project, I am currently working on it.
   author={Kaji, Nobuhiro and Kobayashi, Hayato},
   journal={arXiv preprint arXiv:1704.03956},
   year={2017}
+
+@misc{2020river,
+      title={River: machine learning for streaming data in Python},
+      author={Jacob Montiel and Max Halford and Saulo Martiello Mastelini
+              and Geoffrey Bolmier and Raphael Sourty and Robin Vaysse
+              and Adil Zouitine and Heitor Murilo Gomes and Jesse Read
+              and Talel Abdessalem and Albert Bifet},
+      year={2020},
+      eprint={2012.04740},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
 }
 ```
