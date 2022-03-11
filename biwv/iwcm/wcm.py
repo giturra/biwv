@@ -1,4 +1,5 @@
 import numpy as np
+from nltk import word_tokenize
 
 from multiprocessing import context
 from base.iwv import IncrementalWordVector
@@ -61,7 +62,7 @@ class WordContextMatrix(IncrementalWordVector):
                     #print("3")
                     focus_word.add_context('unk')
                 elif c in self.contexts:
-                    print("4")
+                    # print("4")
                     #print("addd a context")
                     focus_word.add_context(c)   
             #print(f"{focus_word.word} {self.get_embedding(focus_word.word)}")
