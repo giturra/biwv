@@ -34,7 +34,6 @@ class WordContextMatrix(IncrementalWordVector):
             ngram_range=ngram_range,
         )
 
-        #print(self.vocab_size)
         self.vocab = Vocab(self.vocab_size)
         self.contexts = Context(self.context_size)
         self.d = 0
