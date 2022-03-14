@@ -53,17 +53,12 @@ class WordContextMatrix(IncrementalWordVector):
             focus_word = self.vocab[w]
             for c in contexts:
                 if c not in self.contexts:
-                    #print("1")
                     self.contexts.add(c)
                 if c not in self.contexts and len(self.contexts) == self.context_size and focus_word.word == 'unk':
-                    #print("2")
                     focus_word.add_context('unk')
                 elif c not in self.contexts:
-                    #print("3")
                     focus_word.add_context('unk')
                 elif c in self.contexts:
-                    # print("4")
-                    #print("addd a context")
                     focus_word.add_context(c)   
             #print(f"{focus_word.word} {self.get_embedding(focus_word.word)}")
 
@@ -90,9 +85,7 @@ class WordContextMatrix(IncrementalWordVector):
                     pmi = np.log2(
                         (coocurence * self.d) / (word_rep.counter * self.vocab[context].counter) 
                     )
-                    #print(pmi)
                     embedding[ind_c] = max(0, pmi)
-                    #print("hola")
             else:
                 for context, coocurence in contexts:
                     ind_c = self.contexts[context]
