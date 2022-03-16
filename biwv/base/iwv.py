@@ -33,7 +33,7 @@ class IncrementalWordVector(Transformer, VectorizerMixin):
         self.window_size = window_size
 
     @abc.abstractmethod
-    def learn_many(X, y=None, **kwargs):
+    def learn_many(self, X, y=None, **kwargs):
         ...
     
     # todo preguntar al pablo si esto es mala práctica.

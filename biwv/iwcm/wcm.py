@@ -1,7 +1,5 @@
 import numpy as np
-from nltk import word_tokenize
 
-from multiprocessing import context
 from base.iwv import IncrementalWordVector
 from .vocab import Context, Vocab, WordRep
 
