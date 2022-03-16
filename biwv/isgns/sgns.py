@@ -1,6 +1,5 @@
 import math
 import random
-from re import sub
 from typing import Counter
 
 from base.iwv import IncrementalWordVector
