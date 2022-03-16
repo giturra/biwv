@@ -2,7 +2,7 @@ import torch
 import numpy as np
 
 from base.iwv import IncrementalWordVector
-from isgns_vocab import Vocabulary
+from vocab import Vocab
 from unigram_table import UnigramTable
 from rand import RandomNum
 from sg import SkipGram
@@ -43,7 +43,7 @@ class ISGNS(IncrementalWordVector):
         self.vector_size = int(vector_size)
 
         self.vocab_size = int(2 * vocab_size)
-        self.vocab = Vocabulary(int(self.vocab_size * 2))
+        self.vocab = Vocab(int(self.vocab_size * 2))
 
         self.unigram_table_size = unigram_table_size
         self.unigram_table = UnigramTable(self.unigram_table_size, device=device)

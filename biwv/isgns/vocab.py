@@ -1,9 +1,10 @@
-from base._vocab import BaseVocab
+from base import BaseVocab
 
-class Vocabulary(BaseVocab):
+class Vocab(BaseVocab):
 
     def __init__(self, max_size):
         super().__init__(max_size)
+        self.table = dict()
     
     def add(self, word):
         if word not in self.table and not self.is_full():
