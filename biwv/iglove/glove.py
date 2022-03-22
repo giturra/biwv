@@ -31,3 +31,15 @@ class IGlove(IncrementalWordVector):
         )
 
         self.wcm = WordContextMatrix(v_size, c_size, w_size)
+
+    def learn_one(self, x, **kwargs):
+        ...
+    
+    def learn_many(self, X, y=None, **kwargs):
+        ...
+    
+    def transform_one(self, x: dict):
+        ...
+
+    def get_embedding(self, word):
+        ...
