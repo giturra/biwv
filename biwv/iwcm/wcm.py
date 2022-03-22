@@ -77,6 +77,8 @@ class WordContextMatrix(IncrementalWordVector):
                         focus_word.add_context('unk')
                     elif c in self.contexts:
                         focus_word.add_context(c)
+                # if not focus_word.word == 'unk' and not focus_word.word == '@':
+                #     print(f"{focus_word.word} {self.get_embedding(focus_word.word)}")
         
     
     # todo preguntar al pablo si esto es mala práctica.
