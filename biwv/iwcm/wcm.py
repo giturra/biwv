@@ -59,8 +59,25 @@ class WordContextMatrix(IncrementalWordVector):
                     focus_word.add_context(c)   
             #print(f"{focus_word.word} {self.get_embedding(focus_word.word)}")
 
-    def learn_many(X, y=None, **kwargs):
-        ...
+    def learn_many(self, X, y=None, **kwargs):
+        for x in X:
+            tokens = self.process_text(x)
+            for w in tokens:
+                i = tokens.index(w)
+                self.d += 1
+                self.vocab.add(WordRep(w, self.context_size))
+                contexts = _get_contexts(i, self.window_size, tokens)
+                focus_word = self.vocab[w]
+                for c in contexts:
+                    if c not in self.contexts:
+                        self.contexts.add(c)
+                    if c not in self.contexts and len(self.contexts) == self.context_size and focus_word.word == 'unk':
+                        focus_word.add_context('unk')
+                    elif c not in self.contexts:
+                        focus_word.add_context('unk')
+                    elif c in self.contexts:
+                        focus_word.add_context(c)
+        
     
     # todo preguntar al pablo si esto es mala práctica.
 
