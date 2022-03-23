@@ -1,4 +1,4 @@
-# Incremental Word Vectors
+# Benchmarking Incremental Word Vectors
 
 ## Warning
 
