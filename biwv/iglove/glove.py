@@ -34,9 +34,32 @@ class IGlove(WordContextMatrix):
 
     def learn_one(self, x, **kwargs):
         super().learn_one(x, **kwargs)
-
+        word2idx = list(self.vocab.word2idx.items())
+        coocurrence_matrix = []
+        for word, idx in word2idx:
+            wr = self.vocab[word]
+            contexts = wr.contexts.items()
+            for context, count in contexts:
+                coocurrence_matrix.append((
+                    self.vocab.word2idx[word],
+                    self.vocab.word2idx[context],
+                    count 
+                ))
+        print(coocurrence_matrix)
     def learn_many(self, X, y=None, **kwargs):
         super().learn_many(X)
+        word2idx = list(self.vocab.word2idx.items())
+        coocurrence_matrix = []
+        for word, idx in word2idx:
+            wr = self.vocab[word]
+            contexts = wr.contexts.items()
+            for context, count in contexts:
+                coocurrence_matrix.append((
+                    self.vocab.word2idx[word],
+                    self.vocab.word2idx[context],
+                    count 
+                ))
+        
         
     
     def transform_one(self, x: dict):
