@@ -2,7 +2,7 @@ from base import IncrementalWordVector
 from iwcm import WordContextMatrix
 
 
-class IGlove(IncrementalWordVector):
+class IGlove(WordContextMatrix):
 
     def __init__(
         self, 
@@ -16,27 +16,28 @@ class IGlove(IncrementalWordVector):
         preprocessor=None,
         tokenizer=None,
         ngram_range=(1, 1),
-        is_ppmi=True
-    ):
-        super().__init__(
-            v_size,
-            c_size,
-            w_size,
+        is_ppmi=False
+    ):  
+        super().__init__( 
+            v_size, 
+            c_size, 
+            w_size, 
+            normalize=normalize,
             on=on,
             strip_accents=strip_accents,
             lowercase=lowercase,
             preprocessor=preprocessor,
             tokenizer=tokenizer,
             ngram_range=ngram_range,
+            is_ppmi=False
         )
 
-        self.wcm = WordContextMatrix(v_size, c_size, w_size)
-
     def learn_one(self, x, **kwargs):
-        ...
-    
+        super().learn_one(x, **kwargs)
+
     def learn_many(self, X, y=None, **kwargs):
-        ...
+        super().learn_many(X)
+        
     
     def transform_one(self, x: dict):
         ...

@@ -8,11 +8,13 @@ class Vocab(BaseVocab):
     def __init__(self, max_size):
         super().__init__(max_size)
         self.table = defaultdict(int)
+        self.word2idx = defaultdict(int)
 
     def add(self, word):
         if word not in self.table.keys() and not self.is_full():
             self.table[word.word] = word
             self.table[word.word].counter += 1
+            self.word2idx[word] = self.current_size
             self.current_size += 1
         elif word in self.table.keys():
             self.table[word.word].counter += 1
