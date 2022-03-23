@@ -25,6 +25,7 @@ class WordContextMatrix(IncrementalWordVector):
             c_size,
             w_size,
             on=on,
+            normalize=normalize, 
             strip_accents=strip_accents,
             lowercase=lowercase,
             preprocessor=preprocessor,
@@ -57,7 +58,7 @@ class WordContextMatrix(IncrementalWordVector):
                     focus_word.add_context('unk')
                 elif c in self.contexts:
                     focus_word.add_context(c)   
-            #print(f"{focus_word.word} {self.get_embedding(focus_word.word)}")
+            # print(f"{focus_word.word} {self.get_embedding(focus_word.word)}")
 
     def learn_many(self, X, y=None, **kwargs):
         for x in X:
@@ -78,7 +79,7 @@ class WordContextMatrix(IncrementalWordVector):
                     elif c in self.contexts:
                         focus_word.add_context(c)
                 # if not focus_word.word == 'unk' and not focus_word.word == '@':
-                #     print(f"{focus_word.word} {self.get_embedding(focus_word.word)}")
+                
         
     
     # todo preguntar al pablo si esto es mala práctica.
