@@ -1,21 +1,19 @@
-from isgns.vocab import Vocab
-from isgns.sgns import ISGNS   
+import torch
+import numpy as np
+from streamdataloader import TweetStreamLoader
+from iwcm import WordContextMatrix
+from iglove import IGlove
+from nltk import word_tokenize
 
-from river.datasets import SMSSpam
 
-# v = Vocab(3)
-# print(v.add("hello"))
-# print(v.add("are"))
-# print(v.add("you"))
-# print(v.add("?"))
-# print(v.add("you"))
-# print(v.add("hello"))
-# print(v.table)
-# print(v.counter)
-# print(v.total_counts)
+fn = "weet.txt"
+bat_size = 256 
+buff_size = 2048
+emp_ldr = TweetStreamLoader(fn, bat_size, buff_size, shuffle=False)
+igv = IGlove(100, 10000, 20000, 3, device=torch.device('cpu'))
 
-dataset = SMSSpam()
-
-isg = ISGNS(5, 5, 5)
-for xi, yi in dataset:
-    isg.learn_one(xi['body'])
+for (b_idx, batch) in enumerate(emp_ldr):
+  igv.learn_many(batch)
+  
+    
+emp_ldr.fin.close()
