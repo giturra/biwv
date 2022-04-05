@@ -86,6 +86,7 @@ class WordContextMatrix(IncrementalWordVector):
     
     # todo preguntar al pablo si esto es mala práctica.
 
+
     def transform_one(self, x: dict):
         ...
 
