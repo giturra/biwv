@@ -1,5 +1,8 @@
-from .wcm import WordContextMatrix
+from .wcm import WordContextMatrix, get_contexts
+from .vocab import WordRep
 
 __all__ = [
-    "WordContextMatrix"
+    "WordContextMatrix",
+    "get_contexts", 
+    "WordRep"
 ]

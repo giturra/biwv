@@ -67,7 +67,7 @@ class WordContextMatrix(IncrementalWordVector):
                 i = tokens.index(w)
                 self.d += 1
                 self.vocab.add(WordRep(w, self.context_size))
-                contexts = _get_contexts(i, self.window_size, tokens)
+                contexts = get_contexts(i, self.window_size, tokens)
                 focus_word = self.vocab[w]
                 for c in contexts:
                     if c not in self.contexts:
@@ -78,7 +78,9 @@ class WordContextMatrix(IncrementalWordVector):
                         focus_word.add_context('unk')
                     elif c in self.contexts:
                         focus_word.add_context(c)
-                # if not focus_word.word == 'unk' and not focus_word.word == '@':
+                if focus_word.word != 'unk':
+                    print(f'{focus_word.word} {self.get_embedding(focus_word.word)}')
+
                 
         
     
@@ -87,21 +89,27 @@ class WordContextMatrix(IncrementalWordVector):
     def transform_one(self, x: dict):
         ...
 
+    def get_wr(self, word):
+        if word in self.vocab:
+            ...
+
     def get_embedding(self, word):
         if word in self.vocab:
-            print("hola")
             word_rep = self.vocab[word]
             embedding = np.zeros(self.context_size, dtype=float)
             contexts = word_rep.contexts.items()
-            print(contexts)
+            #print(contexts)
             if self.is_ppmi:
                 for context, coocurence in contexts:
                     #print(context, coocurence)
                     ind_c = self.contexts[context]
-                    print(ind_c)
+                    #print(ind_c)
+                    #print(f'es un word rep {word_rep}')
+                    #print(context, coocurence)
                     pmi = np.log2(
                         (coocurence * self.d) / (word_rep.counter * self.vocab[context].counter) 
                     )
+                    #print(f'ppmi = {pmi}')
                     embedding[ind_c] = max(0, pmi)
             else:
                 for context, coocurence in contexts:
@@ -110,7 +118,7 @@ class WordContextMatrix(IncrementalWordVector):
             return embedding
         False
 
-def _get_contexts(ind_word, w_size, tokens):
+def get_contexts(ind_word, w_size, tokens):
     # to do: agregar try para check que es posible obtener los elementos de los tokens
     slice_start = ind_word - w_size if (ind_word - w_size >= 0) else 0
     slice_end = len(tokens) if (ind_word + w_size + 1 >= len(tokens)) else ind_word + w_size + 1

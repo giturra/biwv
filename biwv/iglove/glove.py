@@ -2,9 +2,11 @@ import torch
 import torch.optim as optim
 from torch.utils.data import DataLoader, Dataset
 
+from iwcm import WordRep
+
 from .model import GloVeModel, GloVeDataSet
 
-from iwcm import WordContextMatrix
+from iwcm import WordContextMatrix, get_contexts
 
 
 class IGlove(WordContextMatrix):
@@ -61,11 +63,12 @@ class IGlove(WordContextMatrix):
                     self.vocab.word2idx[context],
                     count 
                 ))
-        print(coocurrence_matrix)
-        self._glove_dataset = DataLoader(GloVeDataSet(coocurrence_matrix), 1)
-        print(self._glove_dataset)
+        #print(coocurrence_matrix)
+        self._glove_dataset = DataLoader(GloVeDataSet(coocurrence_matrix), len(coocurrence_matrix))
+        #print(self._glove_dataset)
         total_loss = 0
         for idx, batch in enumerate(self._glove_dataset):
+            #print(batch)
             self.optimizer.zero_grad()
             i_s, j_s, counts = batch
             #print(len(i_s))
@@ -83,7 +86,7 @@ class IGlove(WordContextMatrix):
 
             loss.backward()
             self.optimizer.step()
-            # print(self.model.embedding_for_tensor(torch.tensor([0])))
+            print(self.model.embedding_for_tensor(torch.tensor([0])))
         
     def learn_many(self, X, y=None, **kwargs):
         super().learn_many(X, y=y, **kwargs)
@@ -98,10 +101,12 @@ class IGlove(WordContextMatrix):
                     self.vocab.word2idx[context],
                     count 
                 ))
-        self._glove_dataset = DataLoader(GloVeDataSet(coocurrence_matrix), 1)
-        #print(self._glove_dataset)
+        self._glove_dataset = DataLoader(GloVeDataSet(coocurrence_matrix), 256)
+        #print(self._glove_dataset
+        print(f'el largo essssssssssssssssssss = {len(coocurrence_matrix)}')
         total_loss = 0
         for idx, batch in enumerate(self._glove_dataset):
+            print(batch)
             self.optimizer.zero_grad()
             i_s, j_s, counts = batch
             #print(len(i_s))
@@ -119,15 +124,35 @@ class IGlove(WordContextMatrix):
 
             loss.backward()
             self.optimizer.step()
-            print(self.model.embedding_for_tensor(torch.tensor([1])))
+            print(self.model.embedding_for_tensor(torch.tensor([0])))
         
-        
-    
+    # def learn_many(self, X, y=None, **kwargs):
+    #     for x in X:
+    #         tokens = self.process_text(x)
+    #         for w in tokens:
+    #             i = tokens.index(w)
+    #             self.d += 1
+    #             self.vocab.add(WordRep(w, self.context_size))
+    #             contexts = get_contexts(i, self.window_size, tokens)
+    #             focus_word = self.vocab[w]
+    #             for c in contexts:
+    #                 print
+    #                 if c not in self.contexts:
+    #                     self.contexts.add(c)
+    #                 if c not in self.contexts and len(self.contexts) == self.context_size and focus_word.word == 'unk':
+    #                     focus_word.add_context('unk')
+    #                 elif c not in self.contexts:
+    #                     focus_word.add_context('unk')
+    #                 elif c in self.contexts:
+    #                     focus_word.add_context(c)
+    #             if focus_word.word != 'unk':
+    #                 print(f'{focus_word.word} {self.get_embedding(focus_word.word)}')
+
     def transform_one(self, x: dict):
         ...
 
-    def get_embedding(self, word):
-        ...
+    # def get_embedding(self, word):
+    #     ...
 
 
 
