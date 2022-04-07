@@ -42,8 +42,6 @@ class WordContextMatrix(IncrementalWordVector):
         self.d = 0
 
         self.is_ppmi = is_ppmi
-
-        # self.vocab.add(WordRep('unk', self.context_size))
     
     def learn_one(self, x, **kwargs):
         tokens = self.process_text(x)
@@ -70,7 +68,6 @@ class WordContextMatrix(IncrementalWordVector):
 
     def learn_many(self, X, y=None, **kwargs):
         for x in X:
-        
             tokens = self.process_text(x)
             if len(self.vocab) <= self.vocab_size: 
                 for w in tokens:
@@ -117,39 +114,6 @@ class WordContextMatrix(IncrementalWordVector):
             contexts_ids = list(self.contexts.index2word.keys())
             return np.array(list(map(c2p, contexts_ids)))
 
-    # def get_embedding(self, word):
-    #     if word in self.vocab:
-    #         word_rep = self.vocab[word]
-    #         embedding = np.zeros(self.context_size, dtype=float)
-    #         contexts = word_rep.contexts.items()
-    #         #print(contexts)
-    #         if self.is_ppmi:
-    #             for context, coocurence in contexts:
-    #                 #print(context, coocurence)
-    #                 ind_c = self.contexts[context]
-    #                 #print(ind_c)
-    #                 #print(f'es un word rep {word_rep}')
-    #                 #print(context, coocurence)
-    #                 pmi = np.log2(
-    #                     (coocurence * self.d) / (word_rep.counter * self.vocab[context].counter) 
-    #                 )
-    #                 #print(f'ppmi = {pmi}')
-    #                 embedding[ind_c] = max(0, pmi)
-    #         else:
-    #             for context, coocurence in contexts:
-    #                 ind_c = self.contexts[context]
-    #                 embedding[ind_c] = coocurence 
-    #         return embedding
-    #     False
-
-# def get_contexts(ind_word, w_size, tokens):
-#     # to do: agregar try para check que es posible obtener los elementos de los tokens
-#     slice_start = ind_word - w_size if (ind_word - w_size >= 0) else 0
-#     slice_end = len(tokens) if (ind_word + w_size + 1 >= len(tokens)) else ind_word + w_size + 1
-#     first_part = tokens[slice_start: ind_word]
-#     last_part = tokens[ind_word + 1: slice_end]
-#     contexts = tuple(first_part + last_part)
-#     return contexts
 
 def context_windows(region, left_size, right_size):
     """generate left_context, word, right_context tuples for each region

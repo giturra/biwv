@@ -2,11 +2,11 @@ import torch
 import torch.optim as optim
 from torch.utils.data import DataLoader, Dataset
 
-from iwcm import WordRep
+from collections import Counter
 
 from .model import GloVeModel, GloVeDataSet
 
-from iwcm import WordContextMatrix, get_contexts
+from iwcm import WordContextMatrix
 
 
 class IGlove(WordContextMatrix):
@@ -17,6 +17,7 @@ class IGlove(WordContextMatrix):
         v_size, 
         c_size, 
         w_size,
+        min_occurrance=1,
         learning_rate=0.05, 
         normalize=True,
         on=None,
@@ -50,22 +51,40 @@ class IGlove(WordContextMatrix):
         self.verbose = verbose
         self.device = device
 
+        self.min_occurrance = min_occurrance
+
     def learn_one(self, x, **kwargs):
-        super().learn_one(x, **kwargs)
-        word2idx = list(self.vocab.word2idx.items())
-        coocurrence_matrix = []
-        for word, idx in word2idx:
-            wr = self.vocab[word]
-            contexts = wr.contexts.items()
-            for context, count in contexts:
-                coocurrence_matrix.append((
-                    self.vocab.word2idx[word],
-                    self.vocab.word2idx[context],
-                    count 
-                ))
-        #print(coocurrence_matrix)
-        self._glove_dataset = DataLoader(GloVeDataSet(coocurrence_matrix), len(coocurrence_matrix))
-        #print(self._glove_dataset)
+        ...
+    
+    def learn_many(self, X, y=None, **kwargs):
+        word_counts = Counter()
+        for x in X:
+            tokens = self.process_text(x)
+            if len(self.vocab) <= self.vocab_size: 
+                for w in tokens:
+                    self.vocab.add(w)
+            if len(self.contexts) <= self.context_size:
+                for w in tokens:
+                    self.contexts.add(w)
+            idxs = self.tokens2idxs(tokens)
+            # word_counts.update(idxs)
+            for left_context, word, right_context in context_windows(idxs, self.window_size, self.window_size):
+                self.d += 1
+                if word == -1:   
+                    continue
+                else:
+                    for i, context_word in enumerate(left_context[::-1]):
+                        if context_word in self.contexts:
+                            word_counts[(word, context_word)] += 1
+                            self.coocurence_matrix[word, context_word] += 1 / (i + 1)
+                    for i, context_word in enumerate(right_context):
+                        if context_word in self.contexts:
+                            word_counts[(word, context_word)] += 1
+                            self.coocurence_matrix[word, context_word] += 1 / (i + 1)
+        cooc_matrix = [
+            (idx[0], idx[1], count) for (idx, count) in word_counts.items()
+        ]
+        self._glove_dataset = DataLoader(GloVeDataSet(cooc_matrix), len(cooc_matrix))
         total_loss = 0
         for idx, batch in enumerate(self._glove_dataset):
             #print(batch)
@@ -86,67 +105,10 @@ class IGlove(WordContextMatrix):
 
             loss.backward()
             self.optimizer.step()
-            print(self.model.embedding_for_tensor(torch.tensor([0])))
+            print(f'largo tensor {self.model.embedding_for_tensor(torch.tensor([0]))}')
         
-    def learn_many(self, X, y=None, **kwargs):
-        super().learn_many(X, y=y, **kwargs)
-        word2idx = list(self.vocab.word2idx.items())
-        coocurrence_matrix = []
-        for word, idx in word2idx:
-            wr = self.vocab[word]
-            contexts = wr.contexts.items()
-            for context, count in contexts:
-                coocurrence_matrix.append((
-                    self.vocab.word2idx[word],
-                    self.vocab.word2idx[context],
-                    count 
-                ))
-        self._glove_dataset = DataLoader(GloVeDataSet(coocurrence_matrix), 256)
-        #print(self._glove_dataset
-        print(f'el largo essssssssssssssssssss = {len(coocurrence_matrix)}')
-        total_loss = 0
-        for idx, batch in enumerate(self._glove_dataset):
-            print(batch)
-            self.optimizer.zero_grad()
-            i_s, j_s, counts = batch
-            #print(len(i_s))
-            i_s = i_s.to(self.device)
-            j_s = j_s.to(self.device)
-            counts = counts.to(self.device)
-            loss = self.model._loss(i_s, j_s, counts)
-
-            total_loss += loss.item()
-            # if idx % loop_interval == 0:
-            #     avg_loss = total_loss / loop_interval
-            #     print("epoch: {}, current step: {}, average loss: {}".format(
-            #         epoch, idx, avg_loss))
-            #     total_loss = 0
-
-            loss.backward()
-            self.optimizer.step()
-            print(self.model.embedding_for_tensor(torch.tensor([0])))
         
-    # def learn_many(self, X, y=None, **kwargs):
-    #     for x in X:
-    #         tokens = self.process_text(x)
-    #         for w in tokens:
-    #             i = tokens.index(w)
-    #             self.d += 1
-    #             self.vocab.add(WordRep(w, self.context_size))
-    #             contexts = get_contexts(i, self.window_size, tokens)
-    #             focus_word = self.vocab[w]
-    #             for c in contexts:
-    #                 print
-    #                 if c not in self.contexts:
-    #                     self.contexts.add(c)
-    #                 if c not in self.contexts and len(self.contexts) == self.context_size and focus_word.word == 'unk':
-    #                     focus_word.add_context('unk')
-    #                 elif c not in self.contexts:
-    #                     focus_word.add_context('unk')
-    #                 elif c in self.contexts:
-    #                     focus_word.add_context(c)
-    #             if focus_word.word != 'unk':
-    #                 print(f'{focus_word.word} {self.get_embedding(focus_word.word)}')
+
 
     def transform_one(self, x: dict):
         ...
@@ -157,3 +119,35 @@ class IGlove(WordContextMatrix):
 
 
 
+def context_windows(region, left_size, right_size):
+    """generate left_context, word, right_context tuples for each region
+
+    Args:
+        region (str): a sentence
+        left_size (int): left windows size
+        right_size (int): right windows size
+    """
+
+    for i, word in enumerate(region):
+        start_index = i - left_size
+        end_index = i + right_size
+        left_context = window(region, start_index, i - 1)
+        right_context = window(region, i + 1, end_index)
+        yield (left_context, word, right_context)
+
+
+def window(region, start_index, end_index):
+    """Returns the list of words starting from `start_index`, going to `end_index`
+    taken from region. If `start_index` is a negative number, or if `end_index`
+    is greater than the index of the last word in region, this function will pad
+    its return value with `NULL_WORD`.
+
+    Args:
+        region (str): the sentence for extracting the token base on the context
+        start_index (int): index for start step of window
+        end_index (int): index for the end step of window
+    """
+    last_index = len(region) + 1
+    selected_tokens = region[max(start_index, 0):
+                             min(end_index, last_index) + 1]
+    return selected_tokens
