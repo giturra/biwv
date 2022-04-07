@@ -1,3 +1,5 @@
+import numpy as np
+
 def context_windows(region, left_size, right_size):
     """generate left_context, word, right_context tuples for each region
 
