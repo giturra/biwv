@@ -2,7 +2,7 @@ import numpy as np
 from scipy import sparse
 from functools import partial
 
-from base.iwv import IncrementalWordVector
+from base import IncrementalWordVector
 from .vocab import Context, Vocab
 
 from utils import _counts2PPMI, context_windows

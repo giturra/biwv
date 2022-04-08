@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 
-from base.iwv import IncrementalWordVector
+from base import IncrementalWordVector
 from vocab import Vocab
 from unigram_table import UnigramTable
 from rand import RandomNum
