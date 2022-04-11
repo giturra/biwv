@@ -1,3 +1,5 @@
+import pandas as pd
+
 from base import BaseSimulator
 from river.feature_extraction.vectorize import VectorizerMixin
 
@@ -63,15 +65,24 @@ class IncSeedLexicon(BaseSimulator, VectorizerMixin):
 
 class LexiconDataset:
 
-    def __init__(self, path):
-        self.path = path
-        self.data = {}
+    def __init__(self, lexicon):
+        self.data = lexicon
 
+    @staticmethod
+    def from_pandas_series(self, X, y):
+        self.data = {}
+        for x, y in zip(X, y):
+            self.data[x] = y
+ 
+    @staticmethod
+    def from_txt(self, path):
+        self.data = {}
         with open(path, encoding='utf-8') as reader:
             for line in reader:
                 data = line.split("\t")
+                print(data)
                 self.data[data[0]] = data[1]
-        
+
     def get_words(self):
         return list(self.data.keys())
 
