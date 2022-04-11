@@ -1,6 +1,8 @@
 import numpy as np
 from scipy import sparse
 from functools import partial
+from river.utils import numpy2dict
+
 
 from base import IncrementalWordVector
 from .vocab import Context, Vocab
@@ -115,6 +117,11 @@ class WordContextMatrix(IncrementalWordVector):
             )
             contexts_ids = list(self.contexts.index2word.keys())
             return np.array(list(map(c2p, contexts_ids)))
+
+    def embedding2dict(self, word):
+        emb = self.get_embedding(word)
+        return numpy2dict(emb)
+
 
 
 

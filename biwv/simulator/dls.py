@@ -33,8 +33,8 @@ class IncSeedLexicon(BaseSimulator, VectorizerMixin):
             ngram_range=ngram_range,
         )
 
-        self.training_lexicon = training_lexicon
-        self.test_lexico = test_lexicon
+        self.training_lexicon = LexiconDataset(training_lexicon)
+        self.test_lexicon = LexiconDataset(test_lexicon)
         self.clf = clf
     
     
@@ -45,10 +45,14 @@ class IncSeedLexicon(BaseSimulator, VectorizerMixin):
                 tokens = self.process_text(text)
                 for token in tokens:
                     if token in self.training_lexicon:
-                        self._train_classifier()
+                        label = self.training_lexicon[token]
+                        self._train_classifier(token, label)
+                    elif token in self.test_lexicon:
+                        label = self.test_lexicon[token]
+                        self._updateEvatulator(self, token, label)
     
     def _train_classifier(self, token, label):
-        self.clf.learn_one({'token': self.method.get_embedding(token), 'label':label})
+        self.clf.learn_one(self.method.embedding2dict(token), label)
 
     def _updateEvatulator(self, token, label):
         ...
@@ -66,7 +70,6 @@ class LexiconDataset:
         with open(path, encoding='utf-8') as reader:
             for line in reader:
                 data = line.split("\t")
-                print(data)
                 self.data[data[0]] = data[1]
         
     def get_words(self):
