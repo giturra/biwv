@@ -1,8 +1,9 @@
+import random
 import pandas as pd
+from nltk.corpus import wordnet
 
 from base import BaseSimulator
 from river.feature_extraction.vectorize import VectorizerMixin
-
 
 
 class IncSeedLexicon(BaseSimulator, VectorizerMixin):
@@ -11,10 +12,10 @@ class IncSeedLexicon(BaseSimulator, VectorizerMixin):
             self, 
             stream, 
             method, 
-            f, d, 
             training_lexicon, 
-            test_lexicon, 
-            clf,
+            test_lexicon,
+            clf, 
+            f=None, d=None, 
             normalize=True,
             on=None,
             strip_accents=True,
@@ -23,10 +24,10 @@ class IncSeedLexicon(BaseSimulator, VectorizerMixin):
             tokenizer=None,
             ngram_range=(1, 1),
         ):
-        super().__init__(stream, method, f, d)
+        BaseSimulator.__init__(self, stream, method, f, d)
 
-        super().__init__(
-            normalize=normalize,
+        VectorizerMixin.__init__(
+            self, 
             on=on,
             strip_accents=strip_accents,
             lowercase=lowercase,
@@ -35,10 +36,15 @@ class IncSeedLexicon(BaseSimulator, VectorizerMixin):
             ngram_range=ngram_range,
         )
 
-        self.training_lexicon = LexiconDataset(training_lexicon)
-        self.test_lexicon = LexiconDataset(test_lexicon)
+        self.training_lexicon = training_lexicon
+        self.test_lexicon = test_lexicon
         self.clf = clf
-    
+
+        self.oposites_test_words = {}
+        self.oposites_test_words_values = {}
+
+        self._change_lexicon_words()
+        
     
     def train(self):
         for (b_idx, batch) in enumerate(self.stream):
@@ -46,13 +52,13 @@ class IncSeedLexicon(BaseSimulator, VectorizerMixin):
             for text in batch:
                 tokens = self.process_text(text)
                 for token in tokens:
-                    if token in self.training_lexicon:
+                    if token in self.training_lexicon and token in self.method.vocab:
                         label = self.training_lexicon[token]
                         self._train_classifier(token, label)
-                    elif token in self.test_lexicon:
+                    elif token in self.test_lexicon and self.method.vocab:
                         label = self.test_lexicon[token]
-                        self._updateEvatulator(self, token, label)
-    
+                        self._updateEvatulator(token, label)
+            
     def _train_classifier(self, token, label):
         self.clf.learn_one(self.method.embedding2dict(token), label)
 
@@ -60,7 +66,35 @@ class IncSeedLexicon(BaseSimulator, VectorizerMixin):
         ...
 
     def train_with_change(self):
-        ...
+        for (b_idx, batch) in enumerate(self.stream):
+            self.method.learn_many(batch)
+
+    def _change_lexicon_words(self):
+        if self.f is not None:
+            num = int(self.f * len(self.test_lexicon))
+            words = tuple(self.test_lexicon.data.keys())
+            words = random.choices(words, k=num)
+            for word in words:
+                antonyms = []
+                for syn in wordnet.synsets(word):
+                    for lm in syn.lemmas():
+                        if lm.antonyms():
+                            antonyms.append(lm.antonyms()[0].name())
+                if len(antonyms) > 0:
+                    antonym = antonyms[0]
+                    self.oposites_test_words[word] = antonym
+                    self.oposites_test_words_values[antonym] = not self.test_lexicon[word]
+    
+    def _preprocess_batch(self, batch):
+        new_batch = []
+        for text in batch:
+            split_text = text.split(" ")
+            for i, token in enumerate(split_text):
+                if token in self.oposites_test_words:
+                    split_text[i] = self.oposites_test_words[token]
+            new_text = ' '.join(split_text)
+            new_batch.append(new_text)
+        return new_batch
 
 
 class LexiconDataset:
@@ -69,19 +103,26 @@ class LexiconDataset:
         self.data = lexicon
 
     @staticmethod
-    def from_pandas_series(self, X, y):
-        self.data = {}
-        for x, y in zip(X, y):
-            self.data[x] = y
- 
+    def from_pandas_series(X, y):
+        data = {}
+        for x_value, y_value in zip(X, y):
+            if int(y_value) == 1:
+                data[x_value] = True
+            else:
+                data[x_value] = False
+        return LexiconDataset(data)
+    
     @staticmethod
-    def from_txt(self, path):
-        self.data = {}
+    def from_txt(path):
+        data = {}
         with open(path, encoding='utf-8') as reader:
             for line in reader:
                 data = line.split("\t")
-                print(data)
-                self.data[data[0]] = data[1]
+                if int(data[1]) == 1:
+                    data[data[0]] = True
+                else:
+                    data[data[0]] == False
+        return LexiconDataset(data)
 
     def get_words(self):
         return list(self.data.keys())
@@ -94,5 +135,8 @@ class LexiconDataset:
     
     def __str__(self):
         return list(self.data.keys()).__str__()
+    
+    def __len__(self):
+        return len(self.data.keys())
 
     

@@ -92,7 +92,7 @@ class WordContextMatrix(IncrementalWordVector):
                         if context_word in self.contexts:
                             print(context_word)
                             self.coocurence_matrix[word, context_word] += 1.0
-                print(f'{self.vocab.index2word[word]} {self.get_embedding(self.vocab.index2word[word])}')
+                #print(f'{self.vocab.index2word[word]} {self.get_embedding(self.vocab.index2word[word])}')
     
     def tokens2idxs(self, tokens):
         idxs = []
