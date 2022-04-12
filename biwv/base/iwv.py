@@ -2,6 +2,7 @@ import abc
 
 from river.base.transformer import Transformer
 from river.feature_extraction.vectorize import VectorizerMixin
+from river.utils import numpy2dict
 
 
 class IncrementalWordVector(Transformer, VectorizerMixin):
@@ -11,7 +12,6 @@ class IncrementalWordVector(Transformer, VectorizerMixin):
         vocab_size,
         vector_size,
         window_size,
-        normalize=True,
         on=None,
         strip_accents=True,
         lowercase=True,
@@ -42,6 +42,12 @@ class IncrementalWordVector(Transformer, VectorizerMixin):
     def get_embedding(self, word):
         ...
     
-    @abc.abstractclassmethod
+    def embedding2dict(self, word):
+        emb = self.get_embedding(word)
+        return numpy2dict(emb)
+    
     def vocab2dict(self):
-        ...
+        embeddings = {}
+        for word in self.vocab.word2idx.keys():
+            embeddings[word] = self.get_embedding(word)
+        return embeddings

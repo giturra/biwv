@@ -51,7 +51,7 @@ class IncSeedLexicon(BaseSimulator, VectorizerMixin):
         if self.with_change:
             for (b_idx, batch) in enumerate(self.stream):
                 self.counter += len(batch)
-                if self.counter % self.d == 0:
+                if self.counter > self.d:
                     self._train_with_change(batch)
                 else:
                     self._train(batch)    
@@ -78,7 +78,7 @@ class IncSeedLexicon(BaseSimulator, VectorizerMixin):
     def _updateEvatulator(self, token, label):
         ...
 
-    def _train_with_change(self):
+    def _train_with_change(self, batch):
         batch = self._preprocess_batch(batch)
         self.method.learn_many(batch)
         for text in batch:

@@ -37,7 +37,7 @@ class GloVeModel(nn.Module):
         if not torch.is_tensor(tokens):
             raise ValueError("the tokens must be pytorch tensor object")
 
-        return self._focal_embeddings(tokens) + self._context_embeddings(tokens)
+        return (self._focal_embeddings(tokens) + self._context_embeddings(tokens))
 
     def _loss(self, focal_input, context_input, coocurrence_count):
         x_max, alpha = self.x_max, self.alpha

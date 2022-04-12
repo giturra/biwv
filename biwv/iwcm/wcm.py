@@ -16,8 +16,7 @@ class WordContextMatrix(IncrementalWordVector):
         self, 
         v_size, 
         c_size, 
-        w_size, 
-        normalize=True,
+        w_size,
         on=None,
         strip_accents=True,
         lowercase=True,
@@ -31,7 +30,6 @@ class WordContextMatrix(IncrementalWordVector):
             c_size,
             w_size,
             on=on,
-            normalize=normalize, 
             strip_accents=strip_accents,
             lowercase=lowercase,
             preprocessor=preprocessor,
@@ -90,7 +88,7 @@ class WordContextMatrix(IncrementalWordVector):
                             self.coocurence_matrix[word, context_word] += 1.0
                     for i, context_word in enumerate(right_context):
                         if context_word in self.contexts:
-                            print(context_word)
+                            # print(context_word)
                             self.coocurence_matrix[word, context_word] += 1.0
                 #print(f'{self.vocab.index2word[word]} {self.get_embedding(self.vocab.index2word[word])}')
     

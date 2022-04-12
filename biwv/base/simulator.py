@@ -14,7 +14,11 @@ class BaseSimulator:
     @abc.abstractmethod
     def train(self):
         ...
-    
-    @abc.abstractclassmethod
-    def train_with_change(self):
+
+    @abc.abstractmethod
+    def train_without_change(self, batch):    
+        ...
+
+    @abc.abstractmethod
+    def train_with_change(self, batch):
         ...

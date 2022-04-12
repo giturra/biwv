@@ -91,7 +91,7 @@ def main():
     c += 1
     print(batch)
   print(i, c)
-  emp_ldr.fin.close()
+  
 
 #print("End demo ")
 

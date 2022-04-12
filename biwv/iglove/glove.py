@@ -20,7 +20,6 @@ class IGlove(WordContextMatrix):
         w_size,
         min_occurrance=1,
         learning_rate=0.05, 
-        normalize=True,
         on=None,
         strip_accents=True,
         lowercase=True,
@@ -35,7 +34,6 @@ class IGlove(WordContextMatrix):
             v_size, 
             c_size, 
             w_size, 
-            normalize=normalize,
             on=on,
             strip_accents=strip_accents,
             lowercase=lowercase,
@@ -106,7 +104,7 @@ class IGlove(WordContextMatrix):
 
             loss.backward()
             self.optimizer.step()
-            print(f'largo tensor {self.model.embedding_for_tensor(torch.tensor([0]))}')
+            # print(f'largotensor {self.model.embedding_for_tensor(torch.tensor([0]))}')
         
         
 
@@ -114,6 +112,8 @@ class IGlove(WordContextMatrix):
     def transform_one(self, x: dict):
         ...
 
-    # def get_embedding(self, word):
-    #     ...
-
+    def get_embedding(self, word):
+        idx = torch.tensor(self.vocab.word2idx[word])
+        emb = self.model.embedding_for_tensor(idx).cpu().detach().numpy()
+        return emb
+    
