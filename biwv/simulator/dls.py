@@ -16,7 +16,6 @@ class IncSeedLexicon(BaseSimulator, VectorizerMixin):
             test_lexicon,
             clf, 
             f=None, d=None, 
-            normalize=True,
             on=None,
             strip_accents=True,
             lowercase=True,
@@ -40,6 +39,8 @@ class IncSeedLexicon(BaseSimulator, VectorizerMixin):
         self.test_lexicon = test_lexicon
         self.clf = clf
 
+        self.counter = 0
+
         self.oposites_test_words = {}
         self.oposites_test_words_values = {}
 
@@ -47,17 +48,29 @@ class IncSeedLexicon(BaseSimulator, VectorizerMixin):
         
     
     def train(self):
-        for (b_idx, batch) in enumerate(self.stream):
-            self.method.learn_many(batch)
-            for text in batch:
-                tokens = self.process_text(text)
-                for token in tokens:
-                    if token in self.training_lexicon and token in self.method.vocab:
-                        label = self.training_lexicon[token]
-                        self._train_classifier(token, label)
-                    elif token in self.test_lexicon and self.method.vocab:
-                        label = self.test_lexicon[token]
-                        self._updateEvatulator(token, label)
+        if self.with_change:
+            for (b_idx, batch) in enumerate(self.stream):
+                self.counter += len(batch)
+                if self.counter % self.d == 0:
+                    self._train_with_change(batch)
+                else:
+                    self._train(batch)    
+        else:
+            for (b_idx, batch) in enumerate(self.stream):
+                self.counter += len(batch)
+                self._train(batch)
+
+    def _train(self, batch):
+        self.method.learn_many(batch)
+        for text in batch:
+            tokens = self.process_text(text)
+            for token in tokens:
+                if token in self.training_lexicon and token in self.method.vocab:
+                    label = self.training_lexicon[token]
+                    self._train_classifier(token, label)
+                elif token in self.test_lexicon and self.method.vocab:
+                    label = self.test_lexicon[token]
+                    self._updateEvatulator(token, label)
             
     def _train_classifier(self, token, label):
         self.clf.learn_one(self.method.embedding2dict(token), label)
@@ -65,9 +78,25 @@ class IncSeedLexicon(BaseSimulator, VectorizerMixin):
     def _updateEvatulator(self, token, label):
         ...
 
-    def train_with_change(self):
-        for (b_idx, batch) in enumerate(self.stream):
-            self.method.learn_many(batch)
+    def _train_with_change(self):
+        batch = self._preprocess_batch(batch)
+        self.method.learn_many(batch)
+        for text in batch:
+            tokens = self.process_text(text)
+            for token in tokens:
+                if token in self.training_lexicon and token in self.method.vocab:
+                    if token in self.oposites_test_words:
+                        label = self.oposites_test_words_values[token]
+                        self._train_classifier(token, label)
+                    else: 
+                        label = self.training_lexicon[token]
+                        self._train_classifier(token, label)
+                elif token in self.oposites_test_words_values:
+                    label = self.oposites_test_words_values[token]
+                    self._updateEvatulator(token, label)
+                elif token in self.test_lexicon:
+                    label = self.test_lexicon[token]
+                    self._updateEvatulator(token, label)
 
     def _change_lexicon_words(self):
         if self.f is not None:

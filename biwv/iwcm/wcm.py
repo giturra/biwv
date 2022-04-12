@@ -121,6 +121,12 @@ class WordContextMatrix(IncrementalWordVector):
     def embedding2dict(self, word):
         emb = self.get_embedding(word)
         return numpy2dict(emb)
+    
+    def vocab2dict(self):
+        embeddings = {}
+        for word in self.vocab.word2idx.keys():
+            embeddings[word] = self.get_embedding(word)
+        return embeddings
 
 
 
