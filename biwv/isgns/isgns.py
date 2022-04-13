@@ -2,10 +2,10 @@ import torch
 import numpy as np
 
 from base import IncrementalWordVector
-from vocab import Vocab
-from unigram_table import UnigramTable
-from rand import RandomNum
-from sg import SkipGram
+from .vocab import Vocab
+from .unigram_table import UnigramTable
+from .rand import RandomNum
+from .sg import SkipGram
 
 
 class ISGNS(IncrementalWordVector):
@@ -18,20 +18,18 @@ class ISGNS(IncrementalWordVector):
     neg_sample_num=5,
     alpha=0.75,
     subsampling_threshold=1e-3, 
-    normalize=True, 
     on=None, 
     strip_accents=True, 
     lowercase=True, 
     preprocessor=None, 
     tokenizer=None, 
-    ngram_range=False,
+    ngram_range=(1, 1),
     device=torch.device("cuda" if torch.cuda.is_available() else "cpu")):
         
         super().__init__(
             vocab_size, 
             vector_size, 
             window_size, 
-            normalize=normalize, 
             on=on, 
             strip_accents=strip_accents, 
             lowercase=lowercase, 
@@ -42,15 +40,15 @@ class ISGNS(IncrementalWordVector):
 
         self.vector_size = int(vector_size)
 
-        self.vocab_size = int(2 * vocab_size)
-        self.vocab = Vocab(int(self.vocab_size * 2))
+        self.vocab_size = int(vocab_size)
+        self.vocab = Vocab(int(self.vocab_size))
 
         self.unigram_table_size = unigram_table_size
         self.unigram_table = UnigramTable(self.unigram_table_size, device=device)
 
         self.device = device
 
-        self.counts = torch.zeros(int(2 * self.vocab_size))
+        self.counts = torch.zeros(int(self.vocab_size))
         self.counts.to(self.device)
 
         self.total_count = 0
@@ -101,18 +99,19 @@ class ISGNS(IncrementalWordVector):
                         neg_samples[k] = int(self.unigram_table.sample(self.randomizer))
 
                     if X_input is None and y_true is None:
+                        #(neg_samples)
                         X_input, y_true = _create_input(target_index, context_index, neg_samples)    
                         #print(X_input.size())
                         X_input.to(self.device)
                         y_true.to(self.device)
                     else:
+                        # print(neg_samples)
                         x_input, labels = _create_input(target_index, context_index, neg_samples)
                         X_input = torch.vstack((X_input, x_input))
-                        #print(X_input.size())
+                        #print(X_input)
                         X_input.to(self.device)
                         y_true = torch.vstack((y_true, labels))
                         y_true.to(self.device)
-
         y_pred = self.model(X_input)
         y_pred.to(self.device)
                 
@@ -123,11 +122,13 @@ class ISGNS(IncrementalWordVector):
                 
         
         self.optimizer.step()
+        print(self.model.embedding_u.weight[10])
 
     def update_unigram_table(self, word: str):
         word_index = self.vocab.add(word)
-        self.total_count += 1
+        
         if word_index != -1:
+            self.total_count += 1
             self.counts[word_index] += 1
             F = np.power(self.counts[word_index], self.alpha) - np.power(self.counts[word_index] - 1, self.alpha)
             self.unigram_table.update(word_index, F, self.randomizer)
@@ -139,6 +140,9 @@ class ISGNS(IncrementalWordVector):
         v  = self.model.embedding_v.weight[index]
         return ((u + v) / 2).cpu().detach().numpy()
 
+    def transform_one(self, x: dict):
+    
+        ...
 
 def _create_input(target_index, context_index, neg_samples):
     input = [[int(target_index), int(context_index)]]

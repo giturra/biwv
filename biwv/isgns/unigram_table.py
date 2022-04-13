@@ -14,6 +14,7 @@ class UnigramTable:
         
     
     def sample(self, rand):
+        
         rand_num = int(rand.uniform(0, self.current_size))
         output = self.table[rand_num]
         return output
@@ -21,7 +22,7 @@ class UnigramTable:
     def update(self, word_index, weight, rand):
         self.weight_sum += weight
         if self.current_size < self.max_size:
-            new_size = min(rand.round(weight) + self.current_size, self.max_size)
+            new_size = min(rand.round(weight) + self.current_size, self.max_size - 1)
             self.table[self.current_size: new_size] = word_index
             self.current_size = new_size            
         else:

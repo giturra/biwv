@@ -10,13 +10,16 @@ class SkipGram(torch.nn.Module):
         self.embedding_v = torch.nn.Embedding(vocab_size, embedding_dim)
         
     def forward(self, x):
-
+        #print(x)
         # input should be of shape [batch_size, 1+k, 2]
         # split positive and negative sample
         
         x_pos_1, x_pos_2 = x[:, 0, :].T
         x_neg_1, x_neg_2 = x[:, 1:, :].T
-        
+
+        # for val in x_pos_1:
+        #     print(f'val = {val}')
+
         # log-likelihood w.r.t. x_pos
         u = self.embedding_u(x_pos_1)
         
