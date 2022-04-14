@@ -117,8 +117,11 @@ class WordContextMatrix(IncrementalWordVector):
             return np.array(list(map(c2p, contexts_ids)))
 
     def embedding2dict(self, word):
-        emb = self.get_embedding(word)
-        return numpy2dict(emb)
+        if word in self.vocab:
+            emb = self.get_embedding(word)
+            output = numpy2dict(emb) 
+            return output
+        raise ValueError(f"{word} not found in vocabulary.")
     
     def vocab2dict(self):
         embeddings = {}

@@ -3,8 +3,11 @@ import pandas as pd
 from nltk.corpus import wordnet
 
 from base import BaseSimulator
-from river.feature_extraction.vectorize import VectorizerMixin
 
+from river.feature_extraction.vectorize import VectorizerMixin
+from river.metrics import Accuracy, CohenKappa
+
+random.seed(0)
 
 class IncSeedLexicon(BaseSimulator, VectorizerMixin):
 
@@ -14,7 +17,8 @@ class IncSeedLexicon(BaseSimulator, VectorizerMixin):
             method, 
             training_lexicon, 
             test_lexicon,
-            clf, 
+            clf,
+            change=False, 
             f=None, d=None, 
             on=None,
             strip_accents=True,
@@ -23,7 +27,7 @@ class IncSeedLexicon(BaseSimulator, VectorizerMixin):
             tokenizer=None,
             ngram_range=(1, 1),
         ):
-        BaseSimulator.__init__(self, stream, method, f, d)
+        BaseSimulator.__init__(self, stream, method, f=f, d=d, change=change)
 
         VectorizerMixin.__init__(
             self, 
@@ -37,14 +41,15 @@ class IncSeedLexicon(BaseSimulator, VectorizerMixin):
 
         self.training_lexicon = training_lexicon
         self.test_lexicon = test_lexicon
+        
         self.clf = clf
-
-        self.counter = 0
+        self.acc = Accuracy()
 
         self.oposites_test_words = {}
         self.oposites_test_words_values = {}
 
-        self._change_lexicon_words()
+        if self.with_change:
+            self.change_lexicon_words()
         
     
     def train(self):
@@ -52,57 +57,68 @@ class IncSeedLexicon(BaseSimulator, VectorizerMixin):
             for (b_idx, batch) in enumerate(self.stream):
                 self.counter += len(batch)
                 if self.counter > self.d:
-                    self._train_with_change(batch)
+                    #print("holaaaa")
+                    self.train_with_change(batch)
                 else:
-                    self._train(batch)    
+                    self.train_without_change(batch)    
         else:
+            
             for (b_idx, batch) in enumerate(self.stream):
                 self.counter += len(batch)
-                self._train(batch)
+                self.train_without_change(batch)
 
-    def _train(self, batch):
+    def train_without_change(self, batch):
         self.method.learn_many(batch)
         for text in batch:
             tokens = self.process_text(text)
             for token in tokens:
                 if token in self.training_lexicon and token in self.method.vocab:
                     label = self.training_lexicon[token]
-                    self._train_classifier(token, label)
-                elif token in self.test_lexicon and self.method.vocab:
+                    self.train_classifier(token, label)
+                elif token in self.test_lexicon and token in self.method.vocab:
                     label = self.test_lexicon[token]
+                    #print(f'token {token} {label} {self.clf.predict_one(self.method.embedding2dict(token))}')
                     self._updateEvatulator(token, label)
             
-    def _train_classifier(self, token, label):
+    def train_classifier(self, token, label):
+        #print(self.method.embedding2dict(token))
+        #print(self.clf.learn_one(self.method.embedding2dict(token), label))
         self.clf.learn_one(self.method.embedding2dict(token), label)
 
     def _updateEvatulator(self, token, label):
-        ...
+        y_true = label
+        y_pred = self.clf.predict_one(self.method.embedding2dict(token))
+        self.acc.update(y_true=y_true, y_pred=y_pred)
 
-    def _train_with_change(self, batch):
-        batch = self._preprocess_batch(batch)
+    def train_with_change(self, batch):
+        batch = self.preprocess_batch(batch)
         self.method.learn_many(batch)
         for text in batch:
             tokens = self.process_text(text)
             for token in tokens:
                 if token in self.training_lexicon and token in self.method.vocab:
+                    print("hola1")
                     if token in self.oposites_test_words:
                         label = self.oposites_test_words_values[token]
-                        self._train_classifier(token, label)
+                        self.train_classifier(token, label)
                     else: 
                         label = self.training_lexicon[token]
-                        self._train_classifier(token, label)
-                elif token in self.oposites_test_words_values:
+                        self.train_classifier(token, label)
+                elif token in self.oposites_test_words_values and token in self.method.vocab:
+                    print("----------------------------------------------------------------------")
                     label = self.oposites_test_words_values[token]
                     self._updateEvatulator(token, label)
-                elif token in self.test_lexicon:
+                elif token in self.test_lexicon and token in self.method.vocab:
+                    print("hola 3")
                     label = self.test_lexicon[token]
                     self._updateEvatulator(token, label)
 
-    def _change_lexicon_words(self):
+    def change_lexicon_words(self):
         if self.f is not None:
             num = int(self.f * len(self.test_lexicon))
             words = tuple(self.test_lexicon.data.keys())
             words = random.choices(words, k=num)
+            # print(f'words = {words}')
             for word in words:
                 antonyms = []
                 for syn in wordnet.synsets(word):
@@ -114,7 +130,7 @@ class IncSeedLexicon(BaseSimulator, VectorizerMixin):
                     self.oposites_test_words[word] = antonym
                     self.oposites_test_words_values[antonym] = not self.test_lexicon[word]
     
-    def _preprocess_batch(self, batch):
+    def preprocess_batch(self, batch):
         new_batch = []
         for text in batch:
             split_text = text.split(" ")
