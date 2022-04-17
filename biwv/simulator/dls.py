@@ -43,7 +43,7 @@ class IncSeedLexicon(BaseSimulator, VectorizerMixin):
         self.test_lexicon = test_lexicon
         
         self.clf = clf
-        self.acc = Accuracy()
+        self.acc = CohenKappa()
 
         self.oposites_test_words = {}
         self.oposites_test_words_values = {}
