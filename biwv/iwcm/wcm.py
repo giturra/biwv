@@ -7,7 +7,7 @@ from river.utils import numpy2dict
 from base import IncrementalWordVector
 from .vocab import Context, Vocab
 
-from utils import _counts2PPMI, context_windows
+from utils import _counts2PPMI, context_windows, csr_row_set_nz_to_val
 
 
 class WordContextMatrix(IncrementalWordVector):
@@ -39,7 +39,7 @@ class WordContextMatrix(IncrementalWordVector):
 
         self.vocab = Vocab(self.vocab_size)
         self.contexts = Context(self.context_size)
-        self.coocurence_matrix = sparse.lil_matrix((self.vocab_size, self.context_size))
+        self.coocurence_matrix = sparse.csr_matrix((self.vocab_size, self.context_size))
 
         self.d = 0
 

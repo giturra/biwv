@@ -7,7 +7,6 @@ from base import BaseSimulator
 from river.feature_extraction.vectorize import VectorizerMixin
 from river.metrics import Accuracy, CohenKappa
 
-random.seed(0)
 
 class IncSeedLexicon(BaseSimulator, VectorizerMixin):
 

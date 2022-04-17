@@ -1,18 +1,30 @@
 from typing import Counter
-from collections import defaultdict
 from base import BaseVocab
-
+from dsa import SpaceSavingAlgorithm
 
 class Vocab(BaseVocab):
 
-    def __init__(self, max_size):
+    def __init__(self, max_size, ssa=False):
         super().__init__(max_size)
         self.index2word = {}
         self.word2idx = {}
-        self.counts = defaultdict(lambda: -1)
+        self.ssa = ssa
+        if not ssa:
+            self.counts = Counter()
+        else:
+            self.sscounter = SpaceSavingAlgorithm(max_size)
 
         
     def add(self, word):
+        if not self.ssa:
+            self._add(word)
+        else:
+            self._add_dsa(word)
+    
+    def _add_dsa(self, word):
+        ...
+
+    def _add(self, word):
         if word not in self.word2idx.keys() and not self.is_full():
             self.word2idx[word] = self.current_size
             self.index2word[self.current_size] = word
