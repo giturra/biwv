@@ -1,82 +1,100 @@
 from typing import Counter
 from base import BaseVocab
-from dsa import SpaceSavingAlgorithm
+# from dsa import SpaceSavingAlgorithm
+
+# class Vocab(BaseVocab):
+
+#     def __init__(self, max_size, ssa=False):
+#         super().__init__(max_size)
+#         self.index2word = {}
+#         self.word2idx = {}
+#         self.ssa = ssa
+#         if not ssa:
+#             self.counts = Counter()
+#         else:
+#             self.sscounter = SpaceSavingAlgorithm(max_size)
+
+        
+#     def add(self, word):
+#         if not self.ssa:
+#             self._add(word)
+#         else:
+#             self._add_dsa(word)
+    
+#     def _add_dsa(self, word):
+#         ...
+
+#     def _add(self, word):
+#         if word not in self.word2idx.keys() and not self.is_full():
+#             self.word2idx[word] = self.current_size
+#             self.index2word[self.current_size] = word
+#             self.counts[self.word2idx[word]] = 1
+#             self.current_size += 1
+#         elif word in self.word2idx.keys():
+#             self.counts[self.word2idx[word]] += 1
+
+#     def __repr__(self):
+#         return self.word2idx.keys().__repr__()
+
+#     def __str__(self):
+#         return self.word2idx.keys().__str__()
+
+#     def __getitem__(self, word):
+#         if word in self.word2idx:
+#             return self.word2idx[word]
+#         return -1      
+
+#     def __len__(self):
+#         return len(self.word2idx.keys())
+
+#     def __contains__(self, word):
+#         return word in self.word2idx.keys()    
+# 
+#
 
 class Vocab(BaseVocab):
 
-    def __init__(self, max_size, ssa=False):
+    def __init__(self, max_size):
         super().__init__(max_size)
-        self.index2word = {}
-        self.word2idx = {}
-        self.ssa = ssa
-        if not ssa:
-            self.counts = Counter()
-        else:
-            self.sscounter = SpaceSavingAlgorithm(max_size)
-
-        
-    def add(self, word):
-        if not self.ssa:
-            self._add(word)
-        else:
-            self._add_dsa(word)
+        self.current_size = 1
+        self.index2word = {0: 'unk'}
+        self.word2idx = {'unk': 0}
+        self.counter = Counter()
     
-    def _add_dsa(self, word):
-        ...
-
-    def _add(self, word):
+    def add(self, word):
         if word not in self.word2idx.keys() and not self.is_full():
             self.word2idx[word] = self.current_size
             self.index2word[self.current_size] = word
-            self.counts[self.word2idx[word]] = 1
+            self.counter[self.word2idx[word]] = 1
             self.current_size += 1
         elif word in self.word2idx.keys():
-            self.counts[self.word2idx[word]] += 1
-
-    def __repr__(self):
-        return self.word2idx.keys().__repr__()
-
-    def __str__(self):
-        return self.word2idx.keys().__str__()
-
-    def __getitem__(self, word):
-        if word in self.word2idx:
-            return self.word2idx[word]
-        return -1      
-
-    def __len__(self):
-        return len(self.word2idx.keys())
+            idx = self.word2idx[word]
+            self.counter.update([idx])
+        elif word not in self.word2idx.keys():
+            self.counter.update([0])
 
     def __contains__(self, word):
-        return word in self.word2idx.keys()      
+        return word in self.word2idx.keys()       
 
-class Context(BaseVocab):
+class Context(Vocab):
 
     def __init__(self, max_size):
         super().__init__(max_size)
-        self.index2word = {}
-        self.word2idx = {}
-
-    def add(self, word):
-        if word not in self.word2idx and not self.is_full():
-            self.word2idx[word] = self.current_size
-            self.index2word[self.current_size] = word
-            self.current_size += 1
     
     # def __getitem__(self, word):
     #     return self.word2idx[word]
     
-    def __repr__(self):
-        return self.word2idx.keys().__repr__()
+    # def __repr__(self):
+    #     return self.word2idx.keys().__repr__()
 
-    def __str__(self):
-        return self.word2idx.keys().__str__()
+    # def __str__(self):
+    #     return self.word2idx.keys().__str__()
 
-    def __len__(self):
-        return len(self.word2idx.keys())
+    # def __len__(self):
+    #     return len(self.word2idx.keys())
 
-    def __contains__(self, word):
-        return word in self.index2word.keys() 
+    # def __contains__(self, word):
+    #     return word in self.index2word.keys() 
     
 # class WordRep:
 
