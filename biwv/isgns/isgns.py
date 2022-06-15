@@ -74,6 +74,7 @@ class ISGNS(IncrementalWordVector):
         y_true = None
         for phrase in X:
             tokens = self.process_text(phrase)
+            #print(tokens)
             n = len(tokens)
             neg_samples = torch.zeros(int(self.neg_sample_num))
             neg_samples.to(self.device)
@@ -99,9 +100,9 @@ class ISGNS(IncrementalWordVector):
                         neg_samples[k] = int(self.unigram_table.sample(self.randomizer))
 
                     if X_input is None and y_true is None:
-                        #(neg_samples)
+                        #print(f'X_input {X_input}')
                         X_input, y_true = _create_input(target_index, context_index, neg_samples)    
-                        #print(X_input.size())
+                        #print(f'X_input {X_input}')
                         X_input.to(self.device)
                         y_true.to(self.device)
                     else:
@@ -112,17 +113,18 @@ class ISGNS(IncrementalWordVector):
                         X_input.to(self.device)
                         y_true = torch.vstack((y_true, labels))
                         y_true.to(self.device)
-        y_pred = self.model(X_input)
-        y_pred.to(self.device)
-                
-        self.model.zero_grad()
+        if X_input is not None:
+            y_pred = self.model(X_input)
+            y_pred.to(self.device)
+                    
+            self.model.zero_grad()
 
-        loss = self.criterion(y_true.float(), y_pred.float())
-        loss.backward()
-                
-        
-        self.optimizer.step()
-        print(self.model.embedding_u.weight[10])
+            loss = self.criterion(y_true.float(), y_pred.float())
+            loss.backward()
+                    
+            
+            self.optimizer.step()
+        #print(self.model.embedding_u.weight[10])
 
     def update_unigram_table(self, word: str):
         word_index = self.vocab.add(word)
