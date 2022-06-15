@@ -24,3 +24,6 @@ class Vocab(BaseVocab):
             word_index = self.word2idx[word] 
             return word_index
         return -1
+    
+    def __contains__(self, word):
+        return word in self.word2idx
