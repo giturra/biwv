@@ -27,8 +27,8 @@ for i, batch in enumerate(emp_ldr):
 
         for words, weight in zip(men.X, men.y):
             if words[0] in isn.vocab and words[1] in isn.vocab:
-                A.append(words[0])
-                B.append(words[1])
+                A.append(isn.get_embedding(words[0]))
+                B.append(isn.get_embedding(words[1]))
                 y.append(weight)
         A = np.vstack(A)
         B = np.vstack(B)
