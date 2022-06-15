@@ -13,7 +13,7 @@ class SkipGram(torch.nn.Module):
         #print(x)
         # input should be of shape [batch_size, 1+k, 2]
         # split positive and negative sample
-        
+        #print(f'x = {x}')
         x_pos_1, x_pos_2 = x[:, 0, :].T
         x_neg_1, x_neg_2 = x[:, 1:, :].T
 

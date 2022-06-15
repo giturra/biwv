@@ -140,7 +140,13 @@ class ISGNS(IncrementalWordVector):
         index = self.vocab[word]
         u  = self.model.embedding_u.weight[index]
         v  = self.model.embedding_v.weight[index]
-        return ((u + v) / 2).cpu().detach().numpy()
+        return ((u + v) / 2).detach().clone().cpu().numpy()
+    
+    def vocab2dict(self):
+        embeddings = {}
+        for word in self.vocab.word2idx.keys():
+            embeddings[word] = self.get_embedding(word)
+        return embeddings
 
     def transform_one(self, x: dict):
     
