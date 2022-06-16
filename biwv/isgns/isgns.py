@@ -65,8 +65,9 @@ class ISGNS(IncrementalWordVector):
         self.model = SkipGram(self.vocab_size, self.vector_size)
         if self.device == 'cuda':
             self.model.cuda()
-        #self.optimizer = torch.optim.SGD(self.model.parameters(), lr=0.5, momentum=0.9)
-        self.optimizer = torch.optim.Adagrad(self.model.parameters())
+        # self.optimizer = torch.optim.SGD(self.model.parameters(), lr=0.5, momentum=0.9)
+        # self.optimizer = torch.optim.Adagrad(self.model.parameters())
+        self.optimizer = torch.optim.Adam(self.model.parameters())
         self.criterion = torch.nn.BCEWithLogitsLoss()
     
     def learn_many(self, X, y=None):
