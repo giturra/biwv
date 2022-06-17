@@ -70,7 +70,7 @@ class ISGNS(IncrementalWordVector):
         self.optimizer = torch.optim.Adam(self.model.parameters())
         self.criterion = torch.nn.BCEWithLogitsLoss()
 
-        self.scheduler = torch.optim.lr_scheduler.OneCycleLR(self.optimizer, max_lr=110.)
+        self.scheduler = torch.optim.lr_scheduler.OneCycleLR(self.optimizer, max_lr=110., epochs=1)
     
     def learn_many(self, X, y=None):
         X_input = None
