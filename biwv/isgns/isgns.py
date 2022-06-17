@@ -69,6 +69,8 @@ class ISGNS(IncrementalWordVector):
         # self.optimizer = torch.optim.Adagrad(self.model.parameters())
         self.optimizer = torch.optim.Adam(self.model.parameters())
         self.criterion = torch.nn.BCEWithLogitsLoss()
+
+        self.scheduler = torch.optim.lr_scheduler.OneCycleLR(self.optimizer)
     
     def learn_many(self, X, y=None):
         X_input = None
@@ -125,6 +127,7 @@ class ISGNS(IncrementalWordVector):
                     
             
             self.optimizer.step()
+            self.scheduler.step()
         #print(self.model.embedding_u.weight[10])
 
     def update_unigram_table(self, word: str):
